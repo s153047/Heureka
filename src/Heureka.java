@@ -4,6 +4,8 @@ import java.util.Scanner;
 
 public class Heureka {
 	
+	ArrayList<Node> nodes = new ArrayList<Node>();
+	
 	public class Node {
 		int x,y;
 		HashMap<Node, String> egdes = new HashMap<Node, String>();
@@ -18,8 +20,7 @@ public class Heureka {
 	
 	public Heureka(String file) {
 		Scanner input = new Scanner(file);
-		
-		ArrayList<Node> nodes = new ArrayList<Node>();
+		System.out.println(input.next());
 		
 		int x1 = Integer.parseInt(input.next());
 		int y1 = Integer.parseInt(input.next());
@@ -27,40 +28,63 @@ public class Heureka {
 		int x2 = Integer.parseInt(input.next());
 		int y2 = Integer.parseInt(input.next());
 		
+		Node current1 = new Node(x1,y1, null);
+		nodes.add(current1);
+		Node current2 = new Node(x2,y2, null);
+		nodes.add(current2);
 		
+		current1.egdes.put(current2, name);
 		
-		Node start1 = new Node(x1,y1, null);
-		nodes.add(start1);
-		Node start2 = new Node(x2,y2, null);
-		nodes.add(start2);
-		
-		start1.egdes.put(start2, name);
-		
-		int xCurrent;
-		int yCurrent;
-		while(true) {
-			xCurrent = Integer.parseInt(input.next());
-			yCurrent = Integer.parseInt(input.next());
+		int x1Current;
+		int y1Current;
+		int x2Current;
+		int y2Current;
+		while(input.hasNext()) {
+			current1 = null;
+			current2 = null;			
+			
+			x1Current = Integer.parseInt(input.next());
+			y1Current = Integer.parseInt(input.next());
+			name = input.next();
+			x2Current = Integer.parseInt(input.next());
+			y2Current = Integer.parseInt(input.next());
 			
 			for(Node n : nodes) {
-				if(n.x == xCurrent && n.y == yCurrent) {
+				if(n.x == x1Current && n.y == y1Current) {
 					// den findes
-					break;
+					current1 = n;
 				}
-				
+	
+			}
+			for(Node n : nodes) {
+				if(n.x == x2Current && n.y == y2Current) {
+					// den findes
+					current2 = n;
+				}
+	
+			}
+			if(current1 == null) {
+				current1 = new Node(x1Current,y1Current,null);
+				nodes.add(current1);
 			}
 			
+			if(current2 == null) {
+				current2 = new Node(x2Current,y2Current,null);
+				nodes.add(current2);
+			}
 			
-			
-			
-			
+			current1.egdes.put(current2, name);
 			
 		}
+		
+
+
 		
 	}
 	
 	public static void main(String args[]) {
 		Heureka h = new Heureka(args[0]);
+		System.out.println(h.nodes.size());
 	}
 	
 	
