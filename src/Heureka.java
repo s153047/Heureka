@@ -2,8 +2,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Scanner;
 
 public class Heureka {
@@ -14,11 +16,17 @@ public class Heureka {
 	public class Node {
 		int x,y;
 		HashMap<Node, String> egdes = new HashMap<Node, String>();
+		int g=0;
+		int h=0;
 		
 		Node (int x_, int y_, HashMap<Node, String> map){
 			x = x_;
 			y = y_;
 			egdes = map;
+		}
+		
+		public int getf() {
+			return g+h;
 		}
 		
 	}
@@ -87,16 +95,71 @@ public class Heureka {
 			}
 		} catch (FileNotFoundException e) {
 			System.out.println("Error loading in file " + file);
-		}
-		
-
-
-		
+		}	
 	}
+	
+	public boolean Astar(ArrayList<Node> nodes, Node start, Node end) {
+		//expandedNodes & frontier, lav frontier en queue på h+g
+		ArrayList<Node> expanded = new ArrayList<Node>();
+		
+		start.g = 0;
+		start.h = (int) Math.sqrt((start.x-end.x)^2 + (start.y-end.y)^2);
+		
+		PriorityQueue<Node> frontier = new PriorityQueue<Node>(nodes.size(), new Comparator<Node>() {
+			public int compare(Node a, Node b) {
+				return (int) (a.getf()-b.getf());
+			}
+		});
+		
+		frontier.add(start);
+		
+		//ArrayList<Node> frontier = new ArrayList<Node>();
+		
+		//loop på frontier
+		Node current;
+		while(true) {
+			//if empty failure		
+			for(Node n : frontier) {
+				System.out.print(n.x + ","+n.y +":"+ n.g+"+"+n.h+ "  ");
+			}
+			System.out.println();
+			
+			if(frontier.isEmpty()) {
+				return false; //tilføj failure return
+			}
+			// remove n from frontier, add to expanded
+			current = frontier.poll();
+			expanded.add(current);
+			
+			// check if n = goal
+			if(current==end) {
+				System.out.println("goal: "+current.x + "," + current.y);
+				System.out.println("expanded: "+ expanded);
+				return true; //tilføj success return
+			}
+			
+			// add children to frontier
+			
+			for(Node n : current.egdes.keySet()) {
+				if(!expanded.contains(n)) {
+					if(!frontier.contains(n)) {	
+						n.g =  (int) (current.g + Math.sqrt(Math.pow((n.x-current.x),2) + Math.pow((n.y-current.y),2)));
+						n.h =  (int) Math.sqrt(Math.pow(n.x-end.x,2) + Math.pow(n.y-end.y,2));
+						frontier.add(n);
+					} else {
+						n.g = (int) Math.min(n.g,(int) (current.g + Math.sqrt(Math.pow((n.x-current.x),2) + Math.pow((n.y-current.y),2))));
+					}
+				
+				}
+			}
+		}	
+	}
+	
 	
 	public static void main(String args[]) {
 		Heureka h = new Heureka("./gader.txt");
-		System.out.println(h.nodes.size()+" / " + h.c);
+		
+		System.out.println(h.Astar(h.nodes, h.nodes.get(0), h.nodes.get(3)));
 	}
 	
 	
