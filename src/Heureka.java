@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -177,9 +178,16 @@ public class Heureka {
 	
 	class State {
 		ArrayList<Clause> cSet = new ArrayList<Clause>();
-		public State(ArrayList<Clause> cSet_) {
+		int g;
+		public State(ArrayList<Clause> cSet_ , int g_) {
 			cSet = cSet_;
+			g = g_;
 		}
+		
+		public int getLastClauseSize() {
+			return ((cSet.get(cSet.size()-1).neg.size()) + (cSet.get(cSet.size()-1).pos.size()));
+		}
+		
 	}
 	
 	
@@ -189,17 +197,24 @@ public class Heureka {
 		// lav ny frontier
 		
 		ArrayList<State> expanded = new ArrayList<State>();
-		ArrayList<State> frontier = new ArrayList<State>();
+		//ArrayList<State> frontier = new ArrayList<State>();
+		
+		PriorityQueue<State> frontier = new PriorityQueue<State>(99999, new Comparator<State>() {
+			public int compare(State a, State b) {
+				return a.getLastClauseSize() - b.getLastClauseSize() + a.g - b.g;
+			}
+		});
 		
 		frontier.add(initialState);
 		
 		Clause tmpC;
 		State tmpState;
 		State currentState;
+		int g = 0;
 		while(true) {
-			currentState = frontier.get(0);
+			currentState = frontier.poll();
 			frontier.remove(0);
-			
+			g++;
 			for(int i = 0; i < currentState.cSet.size(); i++) {
 				for(int j = i; j < currentState.cSet.size(); j++) {
 					tmpC = resolution(currentState.cSet.get(i),currentState.cSet.get(j));
@@ -215,7 +230,7 @@ public class Heureka {
 					} else if(tmpC != null) {
 						for(Clause c : currentState.cSet) {
 							if(!tmpC.pos.equals(c.pos) || !tmpC.neg.equals(c.neg)) {
-								tmpState = new State(currentState.cSet);
+								tmpState = new State(currentState.cSet,g);
 								tmpState.cSet.add(c);
 								frontier.add(tmpState);
 							}
@@ -285,27 +300,28 @@ public class Heureka {
 	
 	
 	public static void main(String args[]) {
-		ArrayList<Character> a = new ArrayList<Character>();
-		ArrayList<Character> b = new ArrayList<Character>();
-		b.add('Y');
-		b.add('H');
-		
-		b.add('B');
-		b.add('A');
-		
-		a.add('H');
-		a.add('Y');
-		a.add('B');
-		a.add('A');
-
-		Collections.sort(b);
-		Collections.sort(a);
-		System.out.println(a.equals(b));
-		
 		/*
 		Heureka h = new Heureka("./gader.txt");
 		
-		System.out.println(h.Astar(h.nodes, h.nodes.get(0), h.nodes.get(3)));*/
+		System.out.println(h.Astar(h.nodes, h.nodes.get(0), h.nodes.get(3)));
+		*/
+		
+		// initial state s0
+		// Astar(s0) = bool
+		
+		ArrayList<Clause> clauses = new ArrayList<Clause>();
+		
+		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('p','q')), new ArrayList<Character>())));
+		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('p')), new ArrayList<Character>('q'))));
+		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('r')), new ArrayList<Character>('p'))));
+		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('s')), new ArrayList<Character>('p'))));
+		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList()), new ArrayList<Character>(Arrays.asList('p','r','s')))));
+		
+		
+		State initial = new State(clauses,0);
+		
+		System.out.println(Astar(initial));
+		
 	}
 	
 	
