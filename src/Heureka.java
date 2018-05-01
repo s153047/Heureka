@@ -124,10 +124,7 @@ public class Heureka {
 		Node current;
 		while(true) {
 			//if empty failure		
-			for(Node n : frontier) {
-				System.out.print(n.x + ","+n.y +":"+ n.g+"+"+n.h+ "  ");
-			}
-			System.out.println();
+
 			
 			if(frontier.isEmpty()) {
 				return false; //tilføj failure return
@@ -138,8 +135,8 @@ public class Heureka {
 			
 			// check if n = goal
 			if(current==end) {
+				System.out.println("start: "+start.x + "," + start.y);
 				System.out.println("goal: "+current.x + "," + current.y);
-				System.out.println("expanded: "+ expanded);
 				
 				ArrayList<Node> path = new ArrayList<Node>();
 				path.add(current);
@@ -147,12 +144,13 @@ public class Heureka {
 					current=current.cameFrom;
 					path.add(current);
 				}
-				
+				System.out.print("Route: ");
 				for(int i = path.size()-1; i >= 0; i--) {
 					current = path.get(i);
 					System.out.print("("+current.x + "," + current.y+")" +" ; ");
 				}
 				System.out.println();
+				
 				return true; //tilføj success return
 			}
 			
@@ -184,7 +182,7 @@ public class Heureka {
 		
 		Heureka h = new Heureka("./gader.txt");
 		
-		System.out.println(h.Astar(h.nodes, h.nodes.get(0), h.nodes.get(3)));
+		System.out.println(h.Astar(h.nodes, h.nodes.get(0), h.nodes.get(9)));
 		
 		
 		 //initial state s0
