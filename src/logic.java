@@ -80,7 +80,8 @@ public class logic {
 					Clause C = new Clause(tmpPos,tmpNeg);
 
 					C.removeRedundancy();
-
+					
+					
 					return C;
 				}
 			}
@@ -91,7 +92,7 @@ public class logic {
 
 	class State {
 		ArrayList<Clause> cSet = new ArrayList<Clause>();
-		int g;
+		int g = 0;
 		public State(ArrayList<Clause> cSet_ , int g_) {
 			cSet = cSet_;
 			g = g_;
@@ -99,6 +100,10 @@ public class logic {
 
 		public int getLastClauseSize() {
 			return ((cSet.get(cSet.size()-1).neg.size()) + (cSet.get(cSet.size()-1).pos.size()));
+		}
+		
+		public int getf() {
+			return getLastClauseSize()*3 + g;
 		}
 
 	}
@@ -114,44 +119,64 @@ public class logic {
 
 		PriorityQueue<State> frontier = new PriorityQueue<State>(99999, new Comparator<State>() {
 			public int compare(State a, State b) {
-				return a.getLastClauseSize() - b.getLastClauseSize() + a.g - b.g;
+				return a.getf()-b.getf();
 			}
 		});
 
 		frontier.add(initialState);
+		
 
 		Clause tmpC;
+		ArrayList<Clause> tmpcSet;
 		State tmpState;
 		State currentState;
-		int g = 0;
-		while(true) {
+		int expandedNodes = 0;
+		while(true) { //ny fra frontier
 			currentState = frontier.poll();
 			frontier.remove(0);
-			g++;
-			for(int i = 0; i < currentState.cSet.size(); i++) {
+			expandedNodes++;
+			System.out.println("----------");
+			System.out.println("g : " + currentState.g);
+			for(Clause c : currentState.cSet) {
+				for(Character chara : c.pos) {
+					System.out.print(chara+", ");
+				}
+				System.out.print("   |   ");
+				for(Character chara : c.neg) {
+					System.out.print(chara+", ");
+				}
+				System.out.println();
+			}
+		
+			for(int i = 0; i < currentState.cSet.size(); i++) { // kigge clauses igennem i forhold til hinanden
 				for(int j = i; j < currentState.cSet.size(); j++) {
-					
-					tmpC = resolution(currentState.cSet.get(i),currentState.cSet.get(j));
-					if(tmpC == null) {
+					tmpC = resolution(currentState.cSet.get(i),currentState.cSet.get(j));		//R(a,b)
+					if(tmpC == null) { 															//else: R(b,a)
 						tmpC = resolution(currentState.cSet.get(j),currentState.cSet.get(i));
-
+						
 					}
 
-
-					if(tmpC != null && tmpC.pos.isEmpty() && tmpC.neg.isEmpty()) {
-						System.out.println("yay");
+					
+					if(tmpC != null && tmpC.pos.isEmpty() && tmpC.neg.isEmpty()) {				//tjek tom clause
+						System.out.println("expanded nodes : "+expandedNodes);
 						return true;
-					} else if(tmpC != null) {
-						//for(Clause c : currentState.cSet) {
+					} else if(tmpC != null) {													//else: add children
+						boolean alreadyExists = false;
 						for(int k = 0; k < currentState.cSet.size(); k++) {
 							
-							if(!tmpC.pos.equals(currentState.cSet.get(k).pos) || !tmpC.neg.equals(currentState.cSet.get(k).neg)) {
-								
-								tmpState = new State(currentState.cSet,g);
-								tmpState.cSet.add(currentState.cSet.get(k));
-								frontier.add(tmpState);
+							if(tmpC.pos.equals(currentState.cSet.get(k).pos) && tmpC.neg.equals(currentState.cSet.get(k).neg)) {
+								alreadyExists = true;
+								break;
 							}
 						}
+						
+						if(!alreadyExists) {
+							tmpcSet = (ArrayList<Clause>) currentState.cSet.clone();
+							tmpState = new State(tmpcSet,currentState.g + 1);
+							tmpState.cSet.add(tmpC);
+							frontier.add(tmpState);						
+						}
+						
 					}	
 				}
 			}
@@ -162,15 +187,23 @@ public class logic {
 
 
 	}
+	
+	public boolean compareClauses(Clause a, Clause b) {
+		
+		
+		
+		return true;
+	}
+	
 
 	public logic() {
 		
 		ArrayList<Clause> clauses = new ArrayList<Clause>();
 
 		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('p','q')), new ArrayList<Character>())));
-		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('p')), new ArrayList<Character>('q'))));
-		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('r')), new ArrayList<Character>('p'))));
-		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('s')), new ArrayList<Character>('p'))));
+		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('p')), new ArrayList<Character>(Arrays.asList('q')))));
+		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('r')), new ArrayList<Character>(Arrays.asList('p')))));
+		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('s')), new ArrayList<Character>(Arrays.asList('p')))));
 		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList()), new ArrayList<Character>(Arrays.asList('p','r','s')))));
 
 

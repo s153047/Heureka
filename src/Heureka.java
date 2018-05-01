@@ -21,6 +21,7 @@ public class Heureka {
 		HashMap<Node, String> egdes = new HashMap<Node, String>();
 		int g=0;
 		int h=0;
+		Node cameFrom;
 		
 		Node (int x_, int y_, HashMap<Node, String> map){
 			x = x_;
@@ -34,80 +35,7 @@ public class Heureka {
 		
 	}
 	
-	public class Clause {
-		ArrayList<Character> pos = new ArrayList<Character>();
-		ArrayList<Character> neg = new ArrayList<Character>();
-		
-		Clause(ArrayList<Character> a_, ArrayList<Character> b_) {
-			pos = a_;
-			neg = b_;
-		}
-		
-		public void removeRedundancy() {
-			//fjern x, -x redundancy
-			for(int h = 0; h < pos.size(); h++) {
-				for(int k = 0; k < neg.size(); k++) {
-					if(pos.get(h) == neg.get(k)) {
-						pos.remove(h);
-						neg.remove(k);
-					}
-				}
-			}
-			
-			//fjern 'A V A' redundancy
-			Set<Character> hs = new HashSet<>();
-			hs.addAll(pos);
-			pos.clear();
-			pos.addAll(hs);
-			
-			hs.clear();
-			hs.addAll(neg);
-			neg.clear();
-			neg.addAll(hs);
-			
-			
-			
-		}
-	}
-	
-	public Clause resolution(Clause a, Clause b) {
-		// sat op til kun at tjekke den ene vej 
-		
-		// find -x i a og b
-		// find x i den anden
-		// fjern x og -x og union a og b
-		// fjern redundans
-		
 
-		
-		for(int i = 0; i < a.neg.size(); i++) {
-			//check om c giver noget godt
-			for(int j = 0; j < b.pos.size(); j++) {
-				if(a.neg.get(i) == b.pos.get(j)) {
-					
-					ArrayList<Character> tmpPos = new ArrayList<Character>();
-					ArrayList<Character> tmpNeg = new ArrayList<Character>();
-					
-					tmpPos.addAll(b.pos);
-					tmpPos.remove(j);
-					tmpPos.addAll(a.pos);
-					Collections.sort(tmpPos);
-					
-					tmpNeg.addAll(a.neg);
-					tmpNeg.remove(i);
-					tmpNeg.addAll(b.neg);
-					Collections.sort(tmpNeg);
-					
-					Clause C = new Clause(tmpPos,tmpNeg);
-					
-					C.removeRedundancy();
-					
-					return C;
-				}
-			}
-		}
-		return null;
-	}
 	
 	public Heureka(String file) {
 		try {
@@ -176,78 +104,12 @@ public class Heureka {
 		}	
 	}
 	
-	class State {
-		ArrayList<Clause> cSet = new ArrayList<Clause>();
-		int g;
-		public State(ArrayList<Clause> cSet_ , int g_) {
-			cSet = cSet_;
-			g = g_;
-		}
-		
-		public int getLastClauseSize() {
-			return ((cSet.get(cSet.size()-1).neg.size()) + (cSet.get(cSet.size()-1).pos.size()));
-		}
-		
-	}
 	
-	
-	public boolean Astar(State initialState) {
-		// find frontier fra mulige actions
-		// vælg en fra frontier og expand den
-		// lav ny frontier
-		
-		ArrayList<State> expanded = new ArrayList<State>();
-		//ArrayList<State> frontier = new ArrayList<State>();
-		
-		PriorityQueue<State> frontier = new PriorityQueue<State>(99999, new Comparator<State>() {
-			public int compare(State a, State b) {
-				return a.getLastClauseSize() - b.getLastClauseSize() + a.g - b.g;
-			}
-		});
-		
-		frontier.add(initialState);
-		
-		Clause tmpC;
-		State tmpState;
-		State currentState;
-		int g = 0;
-		while(true) {
-			currentState = frontier.poll();
-			frontier.remove(0);
-			g++;
-			for(int i = 0; i < currentState.cSet.size(); i++) {
-				for(int j = i; j < currentState.cSet.size(); j++) {
-					tmpC = resolution(currentState.cSet.get(i),currentState.cSet.get(j));
-					if(tmpC == null) {
-						tmpC = resolution(currentState.cSet.get(j),currentState.cSet.get(i));
-						
-					}
-					
-					
-					if(tmpC != null && tmpC.pos.isEmpty() && tmpC.neg.isEmpty()) {
-						System.out.println("yay");
-						return true;
-					} else if(tmpC != null) {
-						for(Clause c : currentState.cSet) {
-							if(!tmpC.pos.equals(c.pos) || !tmpC.neg.equals(c.neg)) {
-								tmpState = new State(currentState.cSet,g);
-								tmpState.cSet.add(c);
-								frontier.add(tmpState);
-							}
-						}
-					}	
-				}
-			}
-			
-			expanded.add(currentState);
-			
-		}
-
-		
-		
+	public boolean Astar(ArrayList<Node> nodes,Node start, Node end) {
 		//start.g = 0;
 		//start.h = (int) Math.sqrt((start.x-end.x)^2 + (start.y-end.y)^2);
-		/*
+		
+		ArrayList<Node> expanded = new ArrayList<Node>();
 		PriorityQueue<Node> frontier = new PriorityQueue<Node>(nodes.size(), new Comparator<Node>() {
 			public int compare(Node a, Node b) {
 				return (int) (a.getf()-b.getf());
@@ -278,6 +140,19 @@ public class Heureka {
 			if(current==end) {
 				System.out.println("goal: "+current.x + "," + current.y);
 				System.out.println("expanded: "+ expanded);
+				
+				ArrayList<Node> path = new ArrayList<Node>();
+				path.add(current);
+				while(current != start) {
+					current=current.cameFrom;
+					path.add(current);
+				}
+				
+				for(int i = path.size()-1; i >= 0; i--) {
+					current = path.get(i);
+					System.out.print("("+current.x + "," + current.y+")" +" ; ");
+				}
+				System.out.println();
 				return true; //tilføj success return
 			}
 			
@@ -288,39 +163,33 @@ public class Heureka {
 					if(!frontier.contains(n)) {	
 						n.g =  (int) (current.g + Math.sqrt(Math.pow((n.x-current.x),2) + Math.pow((n.y-current.y),2)));
 						n.h =  (int) Math.sqrt(Math.pow(n.x-end.x,2) + Math.pow(n.y-end.y,2));
+						n.cameFrom = current;
 						frontier.add(n);
 					} else {
-						n.g = (int) Math.min(n.g,(int) (current.g + Math.sqrt(Math.pow((n.x-current.x),2) + Math.pow((n.y-current.y),2))));
+						int newg = (int) (current.g + Math.sqrt(Math.pow((n.x-current.x),2) + Math.pow((n.y-current.y),2)));
+						if(n.g > newg){
+							n.g = newg;
+							n.cameFrom = current;
+						}
+						
 					}
 				
 				}
 			}
-		}*/	
+		}	
 	}
 	
 	
 	public static void main(String args[]) {
-		/*
+		
 		Heureka h = new Heureka("./gader.txt");
 		
 		System.out.println(h.Astar(h.nodes, h.nodes.get(0), h.nodes.get(3)));
-		*/
-		
-		// initial state s0
-		// Astar(s0) = bool
-		
-		ArrayList<Clause> clauses = new ArrayList<Clause>();
-		
-		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('p','q')), new ArrayList<Character>())));
-		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('p')), new ArrayList<Character>('q'))));
-		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('r')), new ArrayList<Character>('p'))));
-		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('s')), new ArrayList<Character>('p'))));
-		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList()), new ArrayList<Character>(Arrays.asList('p','r','s')))));
 		
 		
-		State initial = new State(clauses,0);
+		 //initial state s0
+		 //Astar(s0) = bool
 		
-		System.out.println(Astar(initial));
 		
 	}
 	
