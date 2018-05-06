@@ -138,16 +138,17 @@ public class Heureka {
 				System.out.println("start: "+start.x + "," + start.y);
 				System.out.println("goal: "+current.x + "," + current.y);
 				
-				ArrayList<Node> path = new ArrayList<Node>();
-				path.add(current);
+				Node tmp;
+				ArrayList<String> path = new ArrayList<String>();
+				//path.add(current);
 				while(current != start) {
-					current=current.cameFrom;
-					path.add(current);
+					tmp=current.cameFrom;
+					path.add(tmp.egdes.get(current));
+					current=tmp;
 				}
 				System.out.print("Route: ");
 				for(int i = path.size()-1; i >= 0; i--) {
-					current = path.get(i);
-					System.out.print("("+current.x + "," + current.y+")" +" ; ");
+					System.out.print(path.get(i)+" , ");
 				}
 				System.out.println();
 				
