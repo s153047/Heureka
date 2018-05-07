@@ -209,7 +209,7 @@ public class logic {
 		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('p')), new ArrayList<Character>(Arrays.asList('q')))));
 		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('r')), new ArrayList<Character>(Arrays.asList('p')))));
 		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('s')), new ArrayList<Character>(Arrays.asList('p')))));
-		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList()), new ArrayList<Character>(Arrays.asList('a')))));
+		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList()), new ArrayList<Character>(Arrays.asList('p','q','r')))));
 
 
 		initial = new State(clauses,0);
