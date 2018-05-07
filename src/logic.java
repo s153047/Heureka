@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Scanner;
 import java.util.Set;
+
+import javax.swing.plaf.synth.SynthSpinnerUI;
 public class logic {
 	State  initial;
 	
@@ -133,6 +135,7 @@ public class logic {
 		while(true) { //ny fra frontier
 			currentState = frontier.poll();
 			frontier.remove(0);
+			
 			expandedNodes++;
 			System.out.println("----------");
 			System.out.println("g : " + currentState.g);
@@ -145,8 +148,9 @@ public class logic {
 					System.out.print(chara+", ");
 				}
 				System.out.println();
+
 			}
-		
+			System.out.println(expanded.size());
 			for(int i = 0; i < currentState.cSet.size(); i++) { // kigge clauses igennem i forhold til hinanden
 				for(int j = i; j < currentState.cSet.size(); j++) {
 					tmpC = resolution(currentState.cSet.get(i),currentState.cSet.get(j));		//R(a,b)
@@ -170,18 +174,12 @@ public class logic {
 						}
 						
 						if(!alreadyExists) {
-							
-						
 							tmpcSet = (ArrayList<Clause>) currentState.cSet.clone();
 							tmpState = new State(tmpcSet,currentState.g + 1);
 							tmpState.cSet.add(tmpC);
+
+							frontier.add(tmpState);
 							
-							boolean existsInExpanded = doesStateAlreadyExist(tmpState, expanded, frontier);
-							
-							
-							if(!existsInExpanded){
-								frontier.add(tmpState);
-							}
 													
 						}
 						
@@ -201,40 +199,7 @@ public class logic {
 
 	}
 	
-	public boolean doesStateAlreadyExist(State tmpState, ArrayList<State> expanded, PriorityQueue<State> frontier) {
-		for(State s : expanded){
-			if(s.cSet.size() == tmpState.cSet.size()){
-				for(int m = 0; m < s.cSet.size() ; m++){
-					if(s.cSet.get(m).pos.size() == tmpState.cSet.get(m).pos.size() && s.cSet.get(m).neg.size() == tmpState.cSet.get(m).neg.size()){
-						if(s.cSet.get(m).pos.equals( tmpState.cSet.get(m).pos )){
-							return true;
-						}
-						if(s.cSet.get(m).neg.equals( tmpState.cSet.get(m).neg )){
-							return true;
-						}
-					}
-				}
-			}
-		}
-		
-		for(State s : frontier){
-			if(s.cSet.size() == tmpState.cSet.size()){
-				for(int m = 0; m < s.cSet.size() ; m++){
-					if(s.cSet.get(m).pos.size() == tmpState.cSet.get(m).pos.size() && s.cSet.get(m).neg.size() == tmpState.cSet.get(m).neg.size()){
-						if(s.cSet.get(m).pos.equals( tmpState.cSet.get(m).pos )){
-							return true;
-						}
-						if(s.cSet.get(m).neg.equals( tmpState.cSet.get(m).neg )){
-							return true;
-						}
-					}
-				}
-			}
-		}
-		
-		return false;
-	}
-	
+
 
 	public logic() {
 		
@@ -244,7 +209,7 @@ public class logic {
 		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('p')), new ArrayList<Character>(Arrays.asList('q')))));
 		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('r')), new ArrayList<Character>(Arrays.asList('p')))));
 		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('s')), new ArrayList<Character>(Arrays.asList('p')))));
-		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList()), new ArrayList<Character>(Arrays.asList('p','q','r')))));
+		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList()), new ArrayList<Character>(Arrays.asList('a')))));
 
 
 		initial = new State(clauses,0);
@@ -260,6 +225,7 @@ public class logic {
 
 		
 		logic l = new logic();
+
 		
 		System.out.println(l.Astar(l.initial));
 
