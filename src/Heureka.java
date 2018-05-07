@@ -185,11 +185,6 @@ public class Heureka {
 		
 		System.out.println(h.Astar(h.nodes, h.nodes.get(0), h.nodes.get(9)));
 		
-		
-		 //initial state s0
-		 //Astar(s0) = bool
-		
-		
 	}
 	
 	

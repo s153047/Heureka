@@ -202,7 +202,6 @@ public class logic {
 
 
 	public logic() {
-		
 		ArrayList<Clause> clauses = new ArrayList<Clause>();
 
 		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('p','q')), new ArrayList<Character>())));
@@ -213,7 +212,6 @@ public class logic {
 
 
 		initial = new State(clauses,0);
-
 	}
 	
 
