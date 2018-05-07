@@ -115,7 +115,6 @@ public class logic {
 		// lav ny frontier
 
 		ArrayList<State> expanded = new ArrayList<State>();
-		//ArrayList<State> frontier = new ArrayList<State>();
 
 		PriorityQueue<State> frontier = new PriorityQueue<State>(99999, new Comparator<State>() {
 			public int compare(State a, State b) {
@@ -171,28 +170,69 @@ public class logic {
 						}
 						
 						if(!alreadyExists) {
+							
+						
 							tmpcSet = (ArrayList<Clause>) currentState.cSet.clone();
 							tmpState = new State(tmpcSet,currentState.g + 1);
 							tmpState.cSet.add(tmpC);
-							frontier.add(tmpState);						
+							
+							boolean existsInExpanded = doesStateAlreadyExist(tmpState, expanded, frontier);
+							
+							
+							if(!existsInExpanded){
+								frontier.add(tmpState);
+							}
+													
 						}
 						
 					}	
 				}
 			}
-
+			
+			if(frontier.isEmpty()){
+				return false;
+			}
+			
 			expanded.add(currentState);
+			
 
 		}
 
 
 	}
 	
-	public boolean compareClauses(Clause a, Clause b) {
+	public boolean doesStateAlreadyExist(State tmpState, ArrayList<State> expanded, PriorityQueue<State> frontier) {
+		for(State s : expanded){
+			if(s.cSet.size() == tmpState.cSet.size()){
+				for(int m = 0; m < s.cSet.size() ; m++){
+					if(s.cSet.get(m).pos.size() == tmpState.cSet.get(m).pos.size() && s.cSet.get(m).neg.size() == tmpState.cSet.get(m).neg.size()){
+						if(s.cSet.get(m).pos.equals( tmpState.cSet.get(m).pos )){
+							return true;
+						}
+						if(s.cSet.get(m).neg.equals( tmpState.cSet.get(m).neg )){
+							return true;
+						}
+					}
+				}
+			}
+		}
 		
+		for(State s : frontier){
+			if(s.cSet.size() == tmpState.cSet.size()){
+				for(int m = 0; m < s.cSet.size() ; m++){
+					if(s.cSet.get(m).pos.size() == tmpState.cSet.get(m).pos.size() && s.cSet.get(m).neg.size() == tmpState.cSet.get(m).neg.size()){
+						if(s.cSet.get(m).pos.equals( tmpState.cSet.get(m).pos )){
+							return true;
+						}
+						if(s.cSet.get(m).neg.equals( tmpState.cSet.get(m).neg )){
+							return true;
+						}
+					}
+				}
+			}
+		}
 		
-		
-		return true;
+		return false;
 	}
 	
 
@@ -204,7 +244,7 @@ public class logic {
 		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('p')), new ArrayList<Character>(Arrays.asList('q')))));
 		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('r')), new ArrayList<Character>(Arrays.asList('p')))));
 		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList('s')), new ArrayList<Character>(Arrays.asList('p')))));
-		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList()), new ArrayList<Character>(Arrays.asList('p','r','s')))));
+		clauses.add((new Clause(new ArrayList<Character>(Arrays.asList()), new ArrayList<Character>(Arrays.asList('p','q','r')))));
 
 
 		initial = new State(clauses,0);
